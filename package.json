@@ -1,6 +1,6 @@
 {
     "name": "nohello-tools",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "FuncTools",
     "main": "./lib/index.js",
     "module": "./es6/index.js",
@@ -26,8 +26,9 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/KuzunohaChitose/nohello-tools"
+        "url": "https://github.com/KuzunohaChitose/nohello-tools.git"
     },
+    "homepage": "https://github.com/KuzunohaChitose/nohello-tools",
     "author": "KuzunohaChitose",
     "license": "MIT",
     "devDependencies": {
@@ -59,5 +60,8 @@
         "hotscript": "^1.0.12",
         "mysql2": "^3.3.1",
         "react": "^18.2.0"
-    }
+    },
+    "keywords": [
+        "typescript"
+    ]
 }

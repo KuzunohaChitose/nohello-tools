@@ -99,10 +99,16 @@ const withDefaults: <T extends object>(
         },
     });
 
+/**
+ * @since 1.0.4
+ */
 const boolMatch: <R>(left: () => R, right: () => R) => (flag: boolean) => R =
     (left, right) => (flag) =>
         flag ? left() : right();
 
+/**
+ * @since 1.0.4
+ */
 const keyMatch: <R>(
     match: { [index: string | number]: () => R } & { default: () => R },
 ) => (key: string | number) => R = (match) =>

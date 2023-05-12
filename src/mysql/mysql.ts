@@ -17,11 +17,12 @@ type UpdateInfo = {
     warningStatus: number;
 };
 
-type CreateOptions = PoolOptions;
-
 type ExecError = ErrnoException | QueryError;
 
-const createPromisePool = (options: CreateOptions, camelCase: boolean = true) => {
+/**
+ * @since 1.0.4
+ */
+const createTaskPool = (options: PoolOptions, camelCase: boolean = true) => {
     const pool = create(options);
 
     return {
@@ -93,5 +94,5 @@ const createPromisePool = (options: CreateOptions, camelCase: boolean = true) =>
     };
 };
 
-export type { UpdateInfo, CreateOptions, ExecError };
-export { createPromisePool };
+export type { UpdateInfo, ExecError };
+export { createTaskPool };

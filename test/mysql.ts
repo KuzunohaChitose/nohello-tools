@@ -1,10 +1,10 @@
-import { createPromisePool } from "../src/mysql";
+import { createTaskPool } from "../src/mysql";
 import * as TE from "fp-ts/TaskEither";
 import * as Op from "fp-ts/Option";
 import { flow, pipe } from "fp-ts/function";
 import { assert, describe, it } from "vitest";
 
-const { sqlQuery } = createPromisePool({
+const { sqlQuery } = createTaskPool({
     host: "localhost",
     port: 3306,
     user: "root",

@@ -3,7 +3,5 @@
  *
  * @since 1.0.1
  */
-import useMusics from "./useMusics";
-import useBackgroundImages from "./useBackgroundImages";
-
-export { useMusics, useBackgroundImages };
+export { default as useMusics } from "./useMusics";
+export { default as useBackgroundImages } from "./useBackgroundImages";

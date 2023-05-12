@@ -68,12 +68,12 @@ const uncurry: <
     P extends Pipe<CurriedParameters<F>, [Tuples.Take<L>]> = Pipe<
         CurriedParameters<F>,
         [Tuples.Take<L>]
-    >,
+    >
 >(
     ...args: P
-) => (fn: F) => CurriedReturnType<L, F> =
+) => (fn: F) => CurriedReturnType<F, L> =
     (...args: any[]) =>
-    (fn) =>
-        [fn, ...args].reduce((a, b) => a(b)) as any;
+        (fn) =>
+            [fn, ...args].reduce((a, b) => a(...b)) as any;
 
 export { CurriedParameters, CurriedFnFromTuple, CurriedReturnType, uncurry };

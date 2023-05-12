@@ -27,6 +27,18 @@ const call: <P extends any[]>(...args: P) => <R>(fn: (...args: P) => R) => R =
         fn(...args);
 
 /**
+ * 用于调试
+ *
+ * @since 1.0.3
+ */
+const trace: <T>(fn?: (t: T) => void) => (t: T) => T =
+    (fn = console.log) =>
+    (t) => {
+        fn(t);
+        return t;
+    };
+
+/**
  * 判断值是否存在，若不为null或undefined则返回true<br>
  * 此函数可用于类型保护
  *
@@ -86,4 +98,4 @@ const withDefaults: <T extends object>(
         },
     });
 
-export { keys, key, call, withDefaults, loopNext, typeMapper, isPresent };
+export { keys, key, call, withDefaults, loopNext, typeMapper, isPresent, trace };

@@ -1,6 +1,7 @@
 import { GetOptional, Required } from "../dependencies/builtin-types";
-import { pipe } from "fp-ts/function";
+import { constant, flow, pipe } from "fp-ts/function";
 import * as Op from "fp-ts/Option";
+import * as Id from "fp-ts/Identity";
 
 /**
  * @since 1.0.1
@@ -98,4 +99,29 @@ const withDefaults: <T extends object>(
         },
     });
 
-export { keys, key, call, withDefaults, loopNext, typeMapper, isPresent, trace };
+const boolMatch: <R>(left: () => R, right: () => R) => (flag: boolean) => R =
+    (left, right) => (flag) =>
+        flag ? left() : right();
+
+const keyMatch: <R>(
+    match: { [index: string | number]: () => R } & { default: () => R },
+) => (key: string | number) => R = (match) =>
+    flow(
+        (str: string | number) => match[str],
+        Op.fromNullable,
+        Op.getOrElse(constant(match.default)),
+        call(),
+    );
+
+export {
+    keys,
+    key,
+    call,
+    withDefaults,
+    loopNext,
+    typeMapper,
+    isPresent,
+    trace,
+    boolMatch,
+    keyMatch,
+};

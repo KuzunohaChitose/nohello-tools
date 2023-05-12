@@ -1,7 +1,6 @@
 import { GetOptional, Required } from "../dependencies/builtin-types";
 import { constant, flow, pipe } from "fp-ts/function";
 import * as Op from "fp-ts/Option";
-import * as Id from "fp-ts/Identity";
 
 /**
  * @since 1.0.1

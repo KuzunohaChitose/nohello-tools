@@ -6,7 +6,7 @@
 import * as curry from "./curry";
 import * as reactHooks from "./react-hooks";
 import * as vueHooks from "./vue-hooks";
-import * as array from "./array";
+import * as arrays from "./arrays";
 import * as functions from "./functions";
 
-export { curry, reactHooks, vueHooks, array, functions };
+export { curry, reactHooks, vueHooks, arrays, functions };

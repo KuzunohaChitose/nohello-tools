@@ -3,4 +3,4 @@
  *
  * @since 1.0.1
  */
-export * from "./array";
+export * from "./arrays";

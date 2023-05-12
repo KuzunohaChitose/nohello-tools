@@ -1,5 +1,5 @@
 import { Pipe, Tuples, Numbers, Call } from "hotscript";
-import { Parameters, ReturnType } from "../types";
+import { Parameters, ReturnType } from "../dependencies/builtin-types";
 
 /**
  * 获取柯里化函数的参数类型
@@ -68,12 +68,12 @@ const uncurry: <
     P extends Pipe<CurriedParameters<F>, [Tuples.Take<L>]> = Pipe<
         CurriedParameters<F>,
         [Tuples.Take<L>]
-    >
+    >,
 >(
     ...args: P
 ) => (fn: F) => CurriedReturnType<F, L> =
     (...args: any[]) =>
-        (fn) =>
-            [fn, ...args].reduce((a, b) => a(...b)) as any;
+    (fn) =>
+        [fn, ...args].reduce((a, b) => a(...b)) as any;
 
 export { CurriedParameters, CurriedFnFromTuple, CurriedReturnType, uncurry };

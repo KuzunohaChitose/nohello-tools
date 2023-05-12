@@ -1,4 +1,4 @@
-import { GetOptional, Required } from "../types";
+import { GetOptional, Required } from "../dependencies/builtin-types";
 import { pipe } from "fp-ts/function";
 import * as Op from "fp-ts/Option";
 

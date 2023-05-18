@@ -149,46 +149,30 @@ export const signature = (input: {
 // parsers
 // -------------------------------------------------------------------------------------
 
-const ensureReadonlyArray = <A>(
-    as: ReadonlyArray<A> | undefined
-): ReadonlyArray<A> => (as ? as : RA.empty);
+const ensureReadonlyArray = <A>(as: ReadonlyArray<A> | undefined): ReadonlyArray<A> =>
+    as ? as : RA.empty;
 
 export function parseType(
-    node:
-        | ast.ts.TypeNode
-        | ast.ts.TypeParameterDeclaration
-        | ast.ts.CallSignatureDeclaration
+    node: ast.ts.TypeNode | ast.ts.TypeParameterDeclaration | ast.ts.CallSignatureDeclaration,
 ): Type {
     if (ast.ts.isTypeReferenceNode(node)) {
         return {
             _tag: "TypeReference",
             name: node.typeName.getText(),
-            typeArguments: pipe(
-                node.typeArguments,
-                ensureReadonlyArray,
-                RA.map(parseType)
-            ),
+            typeArguments: pipe(node.typeArguments, ensureReadonlyArray, RA.map(parseType)),
         };
     }
-    if (
-        ast.ts.isFunctionTypeNode(node) ||
-        ast.ts.isCallSignatureDeclaration(node)
-    ) {
+    if (ast.ts.isFunctionTypeNode(node) || ast.ts.isCallSignatureDeclaration(node)) {
         if (node.type === undefined) {
-            throw new Error(
-                `(parseType) not sure what to do with ${node.getText()}`
-            );
+            throw new Error(`(parseType) not sure what to do with ${node.getText()}`);
         }
         return signature({
             typeParameters: pipe(
                 node.typeParameters,
                 ensureReadonlyArray,
-                RA.map(parseTypeParameter)
+                RA.map(parseTypeParameter),
             ),
-            parameters: pipe(
-                node.parameters,
-                RA.map(parseParameterDeclaration)
-            ),
+            parameters: pipe(node.parameters, RA.map(parseParameterDeclaration)),
             returnType: parseType(node.type),
         });
     }
@@ -248,10 +232,7 @@ export function parseType(
     }
     if (ast.ts.isTypeLiteralNode(node)) {
         const members = node.members.filter(ast.ts.isCallSignatureDeclaration);
-        const signatures = pipe(
-            members,
-            RA.map(parseType)
-        ) as ReadonlyArray<Signature>;
+        const signatures = pipe(members, RA.map(parseType)) as ReadonlyArray<Signature>;
         return { _tag: "Overloadings", signatures };
     }
     if (ast.ts.isNamedTupleMember(node)) {
@@ -259,9 +240,7 @@ export function parseType(
     }
     if (ast.ts.isTypePredicateNode(node)) {
         if (node.type === undefined) {
-            throw new Error(
-                `(parseType) not sure what to do with ${node.getText()}`
-            );
+            throw new Error(`(parseType) not sure what to do with ${node.getText()}`);
         }
         return parseType(node.type);
     }
@@ -283,21 +262,17 @@ export function parseType(
     throw new Error(`(parseType) not sure what to do with ${node.getText()}`);
 }
 
-export const parseTypeParameter = (
-    tp: ast.ts.TypeParameterDeclaration
-): TypeParameter => {
+export const parseTypeParameter = (tp: ast.ts.TypeParameterDeclaration): TypeParameter => {
     return {
         name: tp.name.getText(),
         constraint: pipe(tp.constraint, O.fromNullable, O.map(parseType)),
     };
 };
 
-export const parseParameterDeclaration = (
-    pd: ast.ts.ParameterDeclaration
-): Parameter => {
+export const parseParameterDeclaration = (pd: ast.ts.ParameterDeclaration): Parameter => {
     if (pd.type === undefined) {
         throw new Error(
-            `(parseParameterDeclaration) not sure what to do with ${pd.getText()} in ${pd.parent.getText()}`
+            `(parseParameterDeclaration) not sure what to do with ${pd.getText()} in ${pd.parent.getText()}`,
         );
     }
     return {
@@ -307,57 +282,44 @@ export const parseParameterDeclaration = (
 };
 
 export const parseSignature = (
-    node:
-        | ast.ts.FunctionDeclaration
-        | ast.ts.CallSignatureDeclaration
-        | ast.ts.FunctionTypeNode
+    node: ast.ts.FunctionDeclaration | ast.ts.CallSignatureDeclaration | ast.ts.FunctionTypeNode,
 ): Signature => {
     if (node.type === undefined) {
-        throw new Error(
-            `(parseSignature) not sure what to do with ${node.getText()}`
-        );
+        throw new Error(`(parseSignature) not sure what to do with ${node.getText()}`);
     }
     return signature({
-        typeParameters: pipe(
-            node.typeParameters,
-            ensureReadonlyArray,
-            RA.map(parseTypeParameter)
-        ),
+        typeParameters: pipe(node.typeParameters, ensureReadonlyArray, RA.map(parseTypeParameter)),
         parameters: pipe(node.parameters, RA.map(parseParameterDeclaration)),
         returnType: parseType(node.type),
     });
 };
 
-export const parseFunctionDeclaration = (
-    fd: ast.FunctionDeclaration
-): FunctionDeclaration => {
+export const parseFunctionDeclaration = (fd: ast.FunctionDeclaration): FunctionDeclaration => {
     const name = fd.getName()!;
     return {
         name,
         overloadings: pipe(
             [...fd.getOverloads(), fd],
-            RA.map((fd) => parseSignature(fd.compilerNode))
+            RA.map((fd) => parseSignature(fd.compilerNode)),
         ),
     };
 };
 
-export const parseInterface = (
-    i: ast.InterfaceDeclaration
-): ReadonlyArray<FunctionDeclaration> => {
+export const parseInterface = (i: ast.InterfaceDeclaration): ReadonlyArray<FunctionDeclaration> => {
     const name = i.getName();
     const members = i.compilerNode.members;
     // CallSignatureDeclaration
     const csds = pipe(
         members,
         RA.filter(ast.ts.isCallSignatureDeclaration),
-        RA.map(parseSignature)
+        RA.map(parseSignature),
     );
     const csdsfd = pipe(
         csds,
         RA.match<ReadonlyArray<FunctionDeclaration>, Signature>(
             () => RA.empty,
-            (signatures) => [{ name, overloadings: signatures }]
-        )
+            (signatures) => [{ name, overloadings: signatures }],
+        ),
     );
     // PropertySignature
     const pss: ReadonlyArray<FunctionDeclaration> = pipe(
@@ -382,16 +344,14 @@ export const parseInterface = (
                     return O.none;
             }
             throw new Error(
-                `(parseInterface (interface: ${name})) not sure what to do with ${type._tag}`
+                `(parseInterface (interface: ${name})) not sure what to do with ${type._tag}`,
             );
-        })
+        }),
     );
     return pipe(csdsfd, RA.concat(pss));
 };
 
-export const parseArrowFunction = (
-    node: ast.ts.ArrowFunction
-): ReadonlyArray<Signature> => {
+export const parseArrowFunction = (node: ast.ts.ArrowFunction): ReadonlyArray<Signature> => {
     return pipe(
         node.type,
         O.fromNullable,
@@ -407,20 +367,18 @@ export const parseArrowFunction = (
                                 typeParameters: pipe(
                                     node.typeParameters,
                                     ensureReadonlyArray,
-                                    RA.map(parseTypeParameter)
+                                    RA.map(parseTypeParameter),
                                 ),
                                 parameters: pipe(
                                     node.parameters,
-                                    RA.map(parseParameterDeclaration)
+                                    RA.map(parseParameterDeclaration),
                                 ),
                                 returnType,
                             });
-                        })
+                        }),
                     );
                 }
-                throw new Error(
-                    `(parseArrowFunction not sure what to do with ${body.getText()}`
-                );
+                throw new Error(`(parseArrowFunction not sure what to do with ${body.getText()}`);
             },
             (returnType) => {
                 // example: export const replicate = <A>(a: A): ((n: number) => ReadonlyArray<A>) => makeBy(() => a)
@@ -429,22 +387,19 @@ export const parseArrowFunction = (
                         typeParameters: pipe(
                             node.typeParameters,
                             ensureReadonlyArray,
-                            RA.map(parseTypeParameter)
+                            RA.map(parseTypeParameter),
                         ),
-                        parameters: pipe(
-                            node.parameters,
-                            RA.map(parseParameterDeclaration)
-                        ),
+                        parameters: pipe(node.parameters, RA.map(parseParameterDeclaration)),
                         returnType: parseType(returnType),
                     }),
                 ];
-            }
-        )
+            },
+        ),
     );
 };
 
 export const parseVariableDeclaration = (
-    vd: ast.VariableDeclaration
+    vd: ast.VariableDeclaration,
 ): ReadonlyArray<FunctionDeclaration> => {
     const compilerNode = vd.compilerNode;
     const type = compilerNode.type;
@@ -467,13 +422,8 @@ export const parseVariableDeclaration = (
             return [{ name, overloadings: [parseSignature(type)] }];
         }
         if (ast.ts.isTypeLiteralNode(type)) {
-            const members = type.members.filter(
-                ast.ts.isCallSignatureDeclaration
-            );
-            const overloadings = pipe(
-                members,
-                RA.map(parseType)
-            ) as ReadonlyArray<Signature>;
+            const members = type.members.filter(ast.ts.isCallSignatureDeclaration);
+            const overloadings = pipe(members, RA.map(parseType)) as ReadonlyArray<Signature>;
             return [{ name, overloadings }];
         }
         if (ast.ts.isIntersectionTypeNode(type)) {
@@ -485,9 +435,7 @@ export const parseVariableDeclaration = (
         if (ast.ts.isTypeQueryNode(type)) {
             return RA.empty;
         }
-        throw new Error(
-            `(parseVariableDeclaration) not sure what to do with ${vd.getFullText()}`
-        );
+        throw new Error(`(parseVariableDeclaration) not sure what to do with ${vd.getFullText()}`);
     }
     if (ast.ts.isArrowFunction(initializer)) {
         return [{ name, overloadings: parseArrowFunction(initializer) }];
@@ -506,9 +454,9 @@ export const parseFile = (src: ast.SourceFile): File => {
             pipe(
                 src.getVariableDeclarations(),
                 RA.filter((vd) => vd.isExported()),
-                RA.flatMap(parseVariableDeclaration)
-            )
-        )
+                RA.flatMap(parseVariableDeclaration),
+            ),
+        ),
     );
     return {
         name,
@@ -529,7 +477,7 @@ export interface Lint {
 export const lint = (
     path: string,
     typeParameters: ReadonlyArray<string>,
-    typeArguments: ReadonlyArray<string>
+    typeArguments: ReadonlyArray<string>,
 ): Lint => ({ path, typeParameters, typeArguments });
 
 const LintMonoid: M.Monoid<Lint> = M.struct({
@@ -545,8 +493,8 @@ export const append =
             bs,
             RA.match(
                 () => [a],
-                RA.map((b) => LintMonoid.concat(a, b))
-            )
+                RA.map((b) => LintMonoid.concat(a, b)),
+            ),
         );
     };
 
@@ -555,9 +503,7 @@ export const getTypeParameters = (type: Type): ReadonlyArray<string> => {
         case "TypeReference":
             return RA.empty;
     }
-    throw new Error(
-        `(getTypeParameters) not sure what to do with ${type._tag}`
-    );
+    throw new Error(`(getTypeParameters) not sure what to do with ${type._tag}`);
 };
 
 export const getTypeArguments = (type: Type): ReadonlyArray<string> => {
@@ -568,11 +514,8 @@ export const getTypeArguments = (type: Type): ReadonlyArray<string> => {
                 RA.match(
                     () => [type.name],
                     (types) =>
-                        pipe(
-                            [type.name],
-                            RA.concat(pipe(types, RA.flatMap(getTypeArguments)))
-                        )
-                )
+                        pipe([type.name], RA.concat(pipe(types, RA.flatMap(getTypeArguments)))),
+                ),
             );
         case "Signature": {
             const typeParameters = pipe(
@@ -580,21 +523,19 @@ export const getTypeArguments = (type: Type): ReadonlyArray<string> => {
                 RA.flatMap((tp) =>
                     pipe(
                         tp.constraint,
-                        O.map((t) =>
-                            pipe(getTypeArguments(t), RA.prepend(tp.name))
-                        ),
-                        O.getOrElse<ReadonlyArray<string>>(() => [tp.name])
-                    )
-                )
+                        O.map((t) => pipe(getTypeArguments(t), RA.prepend(tp.name))),
+                        O.getOrElse<ReadonlyArray<string>>(() => [tp.name]),
+                    ),
+                ),
             );
             const typeArguments = pipe(
                 type.parameters,
-                RA.flatMap((p) => getTypeArguments(p.type))
+                RA.flatMap((p) => getTypeArguments(p.type)),
             );
             return pipe(
                 typeParameters,
                 RA.concat(typeArguments),
-                RA.concat(getTypeArguments(type.returnType))
+                RA.concat(getTypeArguments(type.returnType)),
             );
         }
         case "TypeOperator":
@@ -604,19 +545,19 @@ export const getTypeArguments = (type: Type): ReadonlyArray<string> => {
             return pipe(
                 type.type,
                 O.map(getTypeArguments),
-                O.getOrElse<ReadonlyArray<string>>(() => RA.empty)
+                O.getOrElse<ReadonlyArray<string>>(() => RA.empty),
             );
         case "ConditionalType":
             return pipe(
                 getTypeArguments(type.checkType),
                 RA.concat(getTypeArguments(type.extendsType)),
                 RA.concat(getTypeArguments(type.trueType)),
-                RA.concat(getTypeArguments(type.falseType))
+                RA.concat(getTypeArguments(type.falseType)),
             );
         case "IndexedAccessType":
             return pipe(
                 getTypeArguments(type.objectType),
-                RA.concat(getTypeArguments(type.indexType))
+                RA.concat(getTypeArguments(type.indexType)),
             );
         case "TupleType":
             return pipe(type.elements, RA.flatMap(getTypeArguments));
@@ -634,42 +575,32 @@ export const getTypeArguments = (type: Type): ReadonlyArray<string> => {
             return pipe(
                 type.constraint,
                 O.map(getTypeArguments),
-                O.getOrElse<ReadonlyArray<string>>(() => RA.empty)
+                O.getOrElse<ReadonlyArray<string>>(() => RA.empty),
             );
     }
     // throw new Error(`(getTypeArguments) not sure what to do with ${type._tag}`)
 };
 
-export const lintType = (
-    type: Type,
-    path: string = string.empty
-): ReadonlyArray<Lint> => {
+export const lintType = (type: Type, path: string = string.empty): ReadonlyArray<Lint> => {
     switch (type._tag) {
         case "TypeReference":
-            return [
-                pipe(
-                    lint(path, getTypeParameters(type), getTypeArguments(type))
-                ),
-            ];
+            return [pipe(lint(path, getTypeParameters(type), getTypeArguments(type)))];
         case "Signature":
             return lintSignature(path, type);
         case "Overloadings":
             return pipe(
                 type.signatures,
-                RA.flatMap((t, i) => lintType(t, `/${String(i)}`))
+                RA.flatMap((t, i) => lintType(t, `/${String(i)}`)),
             );
         case "TypeOperator":
             return lintType(type.type, path);
         case "TupleType":
             return pipe(
                 type.elements,
-                RA.flatMap((t) => lintType(t, path))
+                RA.flatMap((t) => lintType(t, path)),
             );
         case "IndexedAccessType":
-            return pipe(
-                lintType(type.objectType, path),
-                RA.concat(lintType(type.indexType, path))
-            );
+            return pipe(lintType(type.objectType, path), RA.concat(lintType(type.indexType, path)));
         case "LiteralType":
         case "Token":
             return RA.empty;
@@ -677,52 +608,46 @@ export const lintType = (
         case "IntersectionType":
             return pipe(
                 type.members,
-                RA.flatMap((t) => lintType(t, path))
+                RA.flatMap((t) => lintType(t, path)),
             );
         case "ConditionalType":
             return pipe(
                 lintType(type.checkType),
                 RA.concat(lintType(type.extendsType)),
                 RA.concat(lintType(type.trueType)),
-                RA.concat(lintType(type.falseType))
+                RA.concat(lintType(type.falseType)),
             );
         case "MappedType":
             return pipe(
                 type.type,
                 O.map(lintType),
-                O.getOrElse<ReadonlyArray<Lint>>(() => RA.empty)
+                O.getOrElse<ReadonlyArray<Lint>>(() => RA.empty),
             );
     }
     throw new Error(`(lintType) not sure what to do with ${type._tag}`);
 };
 
-export const lintSignature = (
-    path: string,
-    s: Signature
-): ReadonlyArray<Lint> => {
+export const lintSignature = (path: string, s: Signature): ReadonlyArray<Lint> => {
     return pipe(
         lint(
             path,
             pipe(
                 s.typeParameters,
-                RA.map((tp) => tp.name)
+                RA.map((tp) => tp.name),
             ),
             pipe(
                 s.parameters,
-                RA.flatMap((p) => getTypeArguments(p.type))
-            )
+                RA.flatMap((p) => getTypeArguments(p.type)),
+            ),
         ),
-        append(lintType(s.returnType))
+        append(lintType(s.returnType)),
     );
 };
 
-export const lintFunction = (
-    filename: string,
-    fd: FunctionDeclaration
-): ReadonlyArray<Lint> => {
+export const lintFunction = (filename: string, fd: FunctionDeclaration): ReadonlyArray<Lint> => {
     return pipe(
         fd.overloadings,
-        RA.flatMap((s, i) => lintSignature(`${filename}/${fd.name}/${i}`, s))
+        RA.flatMap((s, i) => lintSignature(`${filename}/${fd.name}/${i}`, s)),
     );
 };
 
@@ -730,7 +655,7 @@ export const lintFile = (file: File): ReadonlyArray<Lint> => {
     const functions = file.functions;
     return pipe(
         functions,
-        RA.flatMap((f) => lintFunction(file.name, f))
+        RA.flatMap((f) => lintFunction(file.name, f)),
     );
 };
 
@@ -744,21 +669,15 @@ export const check = (lints: ReadonlyArray<Lint>): ReadonlyArray<string> => {
         RA.map((l) => ({
             path: l.path,
             typeParameters: l.typeParameters,
-            typeArguments: pipe(
-                l.typeArguments,
-                intersection(l.typeParameters),
-                uniq
-            ),
-        }))
+            typeArguments: pipe(l.typeArguments, intersection(l.typeParameters), uniq),
+        })),
     )
         .filter((l) => !eq.equals(l.typeParameters, l.typeArguments))
         .map(
             (l) =>
-                `Type Parameter Order Error in ${
-                    l.path
-                }: ${l.typeParameters.join(", ")} !== ${l.typeArguments.join(
-                    ", "
-                )}`
+                `Type Parameter Order Error in ${l.path}: ${l.typeParameters.join(
+                    ", ",
+                )} !== ${l.typeArguments.join(", ")}`,
         );
 };
 
@@ -779,7 +698,7 @@ paths.forEach((path) => project.addSourceFileAtPath(path));
 const files = pipe(project.getSourceFiles(), RA.map(parseFile));
 const checks = pipe(
     files,
-    RA.flatMap((f) => check(lintFile(f)))
+    RA.flatMap((f) => check(lintFile(f))),
 );
 if (checks.length > 0) {
     // tslint:disable-next-line: no-console

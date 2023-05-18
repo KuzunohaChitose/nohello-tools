@@ -101,9 +101,8 @@ const withDefaults: <T extends object>(
 /**
  * @since 1.0.4
  */
-const boolMatch: <R>(left: () => R, right: () => R) => (flag: boolean) => R =
-    (left, right) => (flag) =>
-        flag ? left() : right();
+const boolMatch: <R>(yes: () => R, no: () => R) => (flag: boolean) => R = (yes, no) => (flag) =>
+    flag ? yes() : no();
 
 /**
  * @since 1.0.4
@@ -118,6 +117,13 @@ const keyMatch: <R>(
         call(),
     );
 
+/**
+ * @since 1.0.5
+ */
+const assignTo: <T extends object, K extends keyof T>(target: T, key: K) => (value: T[K]) => T[K] =
+    (target, key) => (value) =>
+        (target[key] = value);
+
 export {
     keys,
     key,
@@ -129,4 +135,5 @@ export {
     trace,
     boolMatch,
     keyMatch,
+    assignTo
 };

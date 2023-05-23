@@ -83,7 +83,7 @@ const takeExc =
     (obj: Obj): { [P in Exclude<keyof Obj, Keys[number]>]: Obj[P] } => {
         const res: any = {};
         (Object.keys(obj) as any[])
-            .filter((k) => keys.indexOf(k) === 1)
+            .filter((k) => keys.indexOf(k) === -1)
             .forEach((key: any) => (res[key] = (obj as any)[key]));
         return res;
     };

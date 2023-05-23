@@ -1,12 +1,8 @@
 import { createPool as create, PoolOptions, QueryError } from "mysql2";
-import { boolMatch, isPresent } from "../functions";
-import * as Ei from "fp-ts/Either";
-import * as Tk from "fp-ts/Task";
-import * as Arr from "fp-ts/Array";
-import * as Op from "fp-ts/Option";
+import { isPresent } from "../functions";
 import ErrnoException = NodeJS.ErrnoException;
 import { camelCase as toCamelCase } from "lodash";
-import { pipe } from "fp-ts/function";
+import { $Ar, $Bl, $Ei, $Fn, $Op, $Tk } from "../fp-ts";
 
 type UpdateInfo = {
     affectedRows: number;
@@ -28,35 +24,35 @@ const createTaskPool = (options: PoolOptions, camelCase: boolean = true) => {
     return {
         sqlQuery<T>(
             sql: `select ${string}` | `show ${string}`,
-        ): Tk.Task<Ei.Either<Op.Option<T[]>, ExecError>> {
+        ): $Tk.Task<$Ei.Either<$Op.Option<T[]>, ExecError>> {
             return () =>
-                new Promise<Ei.Either<Op.Option<T[]>, ExecError>>((resolve) => {
+                new Promise<$Ei.Either<$Op.Option<T[]>, ExecError>>((resolve) => {
                     pool.getConnection((err, conn) => {
                         if (isPresent(err)) {
-                            resolve(Ei.right(err));
+                            resolve($Ei.right(err));
                             return;
                         }
                         conn.query(sql, (err, res) => {
                             conn.release();
                             if (isPresent(err)) {
-                                resolve(Ei.right(err));
+                                resolve($Ei.right(err));
                                 return;
                             }
                             if (!camelCase) {
-                                pipe(res as T[], Op.fromNullable, Ei.left, resolve);
+                                $Fn.pipe(res as T[], $Op.fromNullable, $Ei.left, resolve);
                             } else {
-                                pipe(
+                                $Fn.pipe(
                                     res as T[],
-                                    Arr.map((e) => {
+                                    $Ar.map((e) => {
                                         const out: any = {};
                                         for (const label in e) {
                                             out[toCamelCase(label)] = e[label];
                                         }
                                         return out;
                                     }),
-                                    (e) => (Arr.isEmpty(e) ? null : e),
-                                    Op.fromNullable,
-                                    Ei.left,
+                                    (e) => ($Ar.isEmpty(e) ? null : e),
+                                    $Op.fromNullable,
+                                    $Ei.left,
                                     resolve,
                                 );
                             }
@@ -66,23 +62,23 @@ const createTaskPool = (options: PoolOptions, camelCase: boolean = true) => {
         },
         sqlUpdate(
             sql: `update ${string}` | `delete ${string}` | `insert ${string}`,
-        ): Tk.Task<Ei.Either<UpdateInfo, ExecError>> {
+        ): $Tk.Task<$Ei.Either<UpdateInfo, ExecError>> {
             return () =>
-                new Promise<Ei.Either<UpdateInfo, ExecError>>(() => {
-                    return new Promise<Ei.Either<UpdateInfo, any>>((resolve) => {
+                new Promise<$Ei.Either<UpdateInfo, ExecError>>(() => {
+                    return new Promise<$Ei.Either<UpdateInfo, any>>((resolve) => {
                         pool.getConnection((err, conn) => {
                             if (isPresent(err)) {
-                                resolve(Ei.right(err));
+                                resolve($Ei.right(err));
                                 return;
                             }
                             conn.execute(sql, (err, info) => {
                                 conn.release();
-                                pipe(
+                                $Fn.pipe(
                                     err,
                                     isPresent,
-                                    boolMatch(
-                                        () => Ei.left(info as UpdateInfo),
-                                        () => Ei.right(err as QueryError),
+                                    $Bl.match(
+                                        () => $Ei.right(err as QueryError),
+                                        () => $Ei.left(info as UpdateInfo),
                                     ),
                                     resolve,
                                 );

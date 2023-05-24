@@ -1,8 +1,3 @@
-/**
- * 提供Fp-Ts中常用模块的别名，方便导入
- *
- * @since 1.0.6
- */
 import * as $Tk from "fp-ts/Task";
 import * as $IO from "fp-ts/IO";
 import * as $Ei from "fp-ts/Either";
@@ -41,8 +36,8 @@ export {
     $Rcd,
     $Rec,
     $Set,
-    _FP_,
     $Tup,
     $Eq,
     $Ord,
+    _FP_,
 };

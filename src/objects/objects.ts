@@ -88,4 +88,26 @@ const takeExc =
         return res;
     };
 
+/**
+ * @since 1.0.8
+ */
+const takeKey =
+    <T extends object, K extends keyof T>(key: K) =>
+        (t: T) =>
+            t[key];
+
+/**
+ * @since 1.0.8
+ */
+const callKey: <
+    T,
+    K extends keyof { [P in keyof T as T[P] extends (...args: any[]) => any ? P : never]: T[P] }
+>(
+    key: K,
+    args: T[K] extends (...args: any[]) => any ? Parameters<T[K]> : []
+) => (t: T) => T[K] extends (...args: any[]) => any ? ReturnType<T[K]> : never =
+    (key, args) => (t) => {
+        return (t[key] as any)(...args);
+    };
+
 export { setVal, setKey, assignTo, assignToRvs, takeExc, takeInc };

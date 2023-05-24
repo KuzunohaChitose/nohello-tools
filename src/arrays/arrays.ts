@@ -1,4 +1,4 @@
-import { $Ei, $Eq, $Fn, $Id, $Mp, $Op, $Rec } from "../fp-ts";
+import { $Ei, $Eq, $Fn, $Id, $Mp, $Op, $Rec } from "../dependencies/fp-ts";
 
 const groupBy =
     <K>(eq: $Eq.Eq<K>) =>

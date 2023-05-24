@@ -2,7 +2,7 @@ import { createPool as create, PoolOptions, QueryError } from "mysql2";
 import { isPresent } from "../functions";
 import ErrnoException = NodeJS.ErrnoException;
 import { camelCase as toCamelCase } from "lodash";
-import { $Ar, $Bl, $Ei, $Fn, $Op, $Tk } from "../fp-ts";
+import { $Ar, $Bl, $Ei, $Fn, $Op, $Tk } from "../dependencies/fp-ts";
 
 type UpdateInfo = {
     affectedRows: number;

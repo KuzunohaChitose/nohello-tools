@@ -110,4 +110,4 @@ const callKey: <
         return (t[key] as any)(...args);
     };
 
-export { setVal, setKey, assignTo, assignToRvs, takeExc, takeInc };
+export { setVal, setKey, assignTo, assignToRvs, takeExc, takeInc, callKey, takeKey };

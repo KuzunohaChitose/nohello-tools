@@ -61,7 +61,7 @@ const assignToRvs =
     };
 
 /**
- * 从对象中拿出指定键的值
+ * 从对象中拿出指定键的键值组成的新对象
  *
  * @since 1.0.6
  */
@@ -74,7 +74,7 @@ const takeInc =
     };
 
 /**
- * 从对象中拿出指定键以外的值
+ * 从对象中拿出指定键以外的键值组成的新对象
  *
  * @since 1.0.6
  */
@@ -89,6 +89,8 @@ const takeExc =
     };
 
 /**
+ * 从对象中拿出指定键的值
+ *
  * @since 1.0.8
  */
 const takeKey =
@@ -97,6 +99,8 @@ const takeKey =
             t[key];
 
 /**
+ * 调用对象中的方法
+ *
  * @since 1.0.8
  */
 const callKey: <

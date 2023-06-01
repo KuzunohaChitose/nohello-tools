@@ -31,7 +31,7 @@ const trace: <T>(fn?: (t: T) => void) => (t: T) => T =
  * @returns {boolean}
  * @since 1.0.1
  */
-const isPresent = <T>(e: T | undefined | null): e is T => $Fn.pipe(e, $Op.fromNullable, $Op.isSome);
+const isPresent = <T>(e: T | void | undefined | null): e is T => e !== undefined && e !== null;
 
 /**
  * @since 1.0.1

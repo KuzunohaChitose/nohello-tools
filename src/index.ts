@@ -9,5 +9,6 @@ import * as arrays from "./arrays";
 import * as functions from "./functions";
 import * as objects from "./objects";
 import * as strings from "./strings";
+import * as decorators from "./decorators";
 
-export { reactHooks, vueHooks, arrays, functions, objects, strings };
+export { reactHooks, vueHooks, arrays, functions, objects, strings, decorators };

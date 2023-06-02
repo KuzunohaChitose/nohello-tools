@@ -114,4 +114,36 @@ const callKey: <
         return (t[key] as any)(...args);
     };
 
-export { setVal, setKey, assignTo, assignToRvs, takeExc, takeInc, callKey, takeKey };
+/**
+ * @since 1.0.10
+ */
+const entries = <T extends { [index: string]: any }>(
+    t: T
+): {
+    [P in keyof T]: [P, T[P]];
+}[keyof T][] => {
+    const res = [] as any[];
+    for (const key of Object.keys(t)) {
+        res.push([key, t[key]])
+    }
+    return res;
+};
+
+/**
+ * @since 1.0.10
+ */
+const fromEntries = <T extends [string, any][]>(
+    t: T
+): {
+    [P in T[number] as P[0]]: P[1];
+} => {
+    const res = {} as any;
+
+    for (const [k, v] of t) {
+        res[k] = v;
+    }
+
+    return res;
+};
+
+export { setVal, setKey, assignTo, assignToRvs, takeExc, takeInc, callKey, takeKey, entries, fromEntries };
